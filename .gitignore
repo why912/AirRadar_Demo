@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+*.coverage
+.coverage*
+.cache/
+.pytest_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Envs
+.env
+.venv/
+venv/
+ENV/
+
+# Logs / outputs
+*.log
+logs/
+outputs/
+
+# Model artifacts
+*.pt
+*.pth
+*.onnx
+
+# Data (raw and generated)
+data/
+beijing_20250101-20251108/
+
+# Build / dist
+build/
+dist/

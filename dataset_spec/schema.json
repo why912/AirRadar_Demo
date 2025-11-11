@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AirRadar Dataset Schema",
+  "type": "object",
+  "properties": {
+    "dataset_root": {"type": "string"},
+    "dataset_name": {"type": "string"},
+    "num_nodes": {"type": "integer", "minimum": 1},
+    "input_dim": {"type": "integer", "const": 27},
+    "output_dim": {"type": "integer", "minimum": 6},
+    "seq_len": {"type": "integer", "const": 24},
+    "files": {
+      "type": "object",
+      "properties": {
+        "train": {"type": "string"},
+        "val": {"type": "string"},
+        "test": {"type": "string"},
+        "train_history": {"type": "string"},
+        "val_history": {"type": "string"},
+        "test_history": {"type": "string"},
+        "val_nodes": {"type": "string"},
+        "test_nodes": {"type": "string"},
+        "pos": {"type": "string"}
+      },
+      "required": [
+        "train","val","test",
+        "train_history","val_history","test_history",
+        "val_nodes","test_nodes","pos"
+      ]
+    }
+  },
+  "required": ["dataset_root","dataset_name","num_nodes","input_dim","output_dim","seq_len","files"]
+}

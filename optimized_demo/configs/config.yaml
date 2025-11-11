@@ -1,0 +1,17 @@
+# 优化 Demo 配置示例
+model_name: AirRadarPlus
+mask_rate: 0.5
+hidden_channels: 32
+mlp_expansion: 2
+num_heads: 2
+dartboard: 0
+context_num: 2
+block_num: 2
+sparsity_threshold: 0.01
+pred_attr: PM25
+base_lr: 5e-4
+lr_decay_ratio: 0.5
+max_epochs: 3
+patience: 2
+batch_size: 16
+steps: [200]
