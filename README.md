@@ -1,68 +1,85 @@
-# AirRadar
+# AirRadar Demo（伦理与工程化增强版）
 
-This repo is the implementation of our manuscript entitled AirRadar: Inferring Nationwide Air Quality in
-China with Deep Neural Networks. The code is based on Pytorch 2.1.0, and tested on Ubuntu 16.04 with a NVIDIA GeForce RTX 2080Ti GPU with 12 GB memory. 
+本仓库提供基于 AirRadar 的最小可运行 Demo，面向真实北京小时级空气数据，打通“数据构建→一致性校验→训练评估→可视化→伦理摘要”的端到端闭环。模型融合方向扇区先验与频域全局表征，支持动态节点与缺测掩码；工程侧提供标准化数据规范、可视化产出与能耗等伦理占位指标，便于在教学科研与城市治理中快速验证与复现。
 
-In this study, we present a novel deep network named AirRadar to collectively infer nationwide air quality in China.
+提示：仓库包含 Git LFS 跟踪的 npy/npz 大文件（约 700MB）。协作者在克隆后需安装并启用 Git LFS 才能正确获取数据。
 
-## Requirements
+## 快速开始（Windows PowerShell）
 
-AirFormer uses the following dependencies: 
+1. 创建并激活虚拟环境，安装依赖
 
-* [Pytorch 2.1.0] and its dependencies
-* Numpy and Scipy
-* CUDA 12.2, cuDNN.
-
-
-## Folder Structure
-We list the code of the major modules as follows:
-- The main function to train/test our model: [click here](experiments/airRadar/main.py).
-- The source code of our model: [click here](src/models/airRadar.py).
-- The trainer/tester: [click here](src/trainers/airRadar_stochastic_trainer.py)/[click here](src/trainers/airRadar_trainer.py)/[click here](src/base/trainer.py)
-- Data preparation and preprocessing are located at [click here](src/utils/helper.py).
-- Metric computations: [click here](src/utils/metrics.py).
-
-## Arguments
-We introduce some major arguments of our main function here.
-
-Training settings:
-- mode: indicating the mode, e.g., training or test
-- gpu: using which GPU to train our model
-- seed: the random seed for experiments
-- dataset: which dataset to run
-- base_lr: the learning rate at the beginning
-- lr_decay_ratio: the ratio of learning rate decay
-- batch_size: training or testing batch size
-- mask_rate: the mask rate of all nodes
-- horizon: the length of future steps
-- input_dim: the dimension of inputs
-- max_epochs: the maximum of training epochs
-- patience: the patience of early stopping
-- save_preds: whether to save prediction results
-
-Model hyperparameters:
-- n_hidden: hidden dimensions in CT-MSA and DS-MSA
-- dropout: dropout rate
-- dartboard: which dartboard partition to use. 0: 50-200, 1: 50-200-500, 2: 50, 3: 25-100-250.
-- context_num: The number of context.
-- block_num : The numbef of Distance-Aware Integrator blocks
-
-
-## Model Training
-Before running our code, please add the path of this repo to PYTHONPATH.
-```
-export PYTHONPATH=$PYTHONPATH:"the path of this repo"
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 ```
 
-The following examples are conducted on the tiny dataset:
-* Example (AirRadar with default setting):
-```
-python ./experiments/airRadar/main.py --mode train --gpu 0 --dataset AIR_TINY
+2. 安装并初始化 Git LFS（首次在本机执行）
+
+```powershell
+git lfs install
+git lfs pull
 ```
 
-## Model Test
-To test above trained models, you can use the following command to run our code:
-* Example (AirRadar with default setting):
+3. 一键运行 Demo（默认使用数据集 `data/AIR_BJ`，预测 PM2.5）
+
+```powershell
+python optimized_demo/run_demo.py
 ```
-python ./experiments/airRadar/main.py --mode test --gpu 0 --dataset AIR_TINY
-```
+
+运行结束后，模型指标与可视化图片将输出到 `data/AIR_BJ/viz/`，并在控制台打印简要伦理摘要（能耗估计与频域能量切片）。
+
+## 主要特性
+
+- 结构折中：方向扇区先验（DS-MSA）+ 频域 AFNO（FftNet）兼顾局部方向性与全局依赖
+- 动态节点与掩码鲁棒：位置编码可变、训练/评估掩码一致
+- 数据标准化：提供机器可读 schema 与验证器，自动检查文件与形状/范围
+- 可视化：训练曲线、时间序列 Pred vs True（支持幅度匹配与平滑）、空间渐变热力图
+- 伦理占位：能耗粗估与频域能量切片，便于绿色 AI 与过拟合风险观察
+
+## 数据与目录
+
+- 北京数据 CSV：`beijing_20250101-20251108/`（已入库，便于复现）
+- 标准化数据集：`data/AIR_BJ/`（train/val/test 及对应 history、pos、val/test 节点划分）
+- 可视化输出：`data/AIR_BJ/viz/`（训练曲线与示例图）
+
+说明：仓库当前 `pos.npy` 与图/扇区为占位构造，用于闭环验证；替换为真实经纬度与距离构图/分区将显著影响指标与地图效果。
+
+## 配置项（示例）
+
+默认配置位于 `optimized_demo/configs/config.yaml`，常用字段：
+
+- `max_epochs`、`batch_size`：训练轮数与批大小
+- `pred_attr`：预测目标（如 `PM25`）
+- `learning_rate`、`early_stop_patience`：优化与早停
+- `dataset_root`：数据根目录（默认 `data/AIR_BJ`）
+
+可通过修改该文件或在 `run_demo.py` 中传参来调整实验。
+
+## 模型与代码结构
+
+核心入口与模块：
+
+- Demo 入口：`optimized_demo/run_demo.py`
+- 模型实现：`optimized_demo/model/airRadar_plus.py`
+- 训练器：`optimized_demo/utils/trainer_plus.py`
+- 数据构建与校验：`optimized_demo/utils/build_beijing_dataset.py`、`optimized_demo/utils/dataset_validator.py`
+- 可视化：`optimized_demo/vis/visualize.py`
+- 伦理占位：`optimized_demo/ethics/evaluation.py`
+
+原始论文版代码仍保留在 `src/` 与 `experiments/` 目录，便于对照。
+
+## 伦理与可持续性
+
+本 Demo 在流程内嵌能耗估计与频域概览，建议在正式训练中进一步接入 profiler 与碳排放估算；公平性分析可按区域/密度/风向进行切片评估；发布时需明确责任边界与高不确定性提示，避免“虚假确定性”。详见 `ethics_report/AI_Ethics_项目报告.md` 与 `optimized_demo/DEMO_DETAIL.md`。
+
+## 常见问题（FAQ）
+
+- LFS 拉取失败/速度慢：确认已执行 `git lfs install`，网络受限时可改用 Release 附件或对象存储分发数据。
+- 指标与图像不理想：占位的经纬度与构图导致，替换为真实地理先验后会改善；也可调整 `configs/config.yaml`。
+- 显存不足：降低 batch size，或缩短序列长度与隐藏维度。
+
+## 许可证与致谢
+
+本项目基于公开研究复现并做工程改造，去除了 timm 等重依赖，保留自研 DropPath、动态位置编码与数据校验器等组件。原始思路与社区实现对本项目有重要启发，特此致谢。若引入专利相关方法，请在部署前进行合规审查。
+
