@@ -36,9 +36,8 @@ outputs/
 *.pth
 *.onnx
 
-# Data (raw and generated)
-data/
-beijing_20250101-20251108/
+# Data (raw and generated) — allow dataset to be versioned; keep common temp/log ignored above
+# If you prefer excluding large data locally, re-add patterns here or use a global gitignore.
 
 # Build / dist
 build/

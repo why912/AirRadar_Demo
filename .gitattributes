@@ -1,0 +1,6 @@
+# Track large binary arrays with Git LFS
+*.npy filter=lfs diff=lfs merge=lfs -text
+*.npz filter=lfs diff=lfs merge=lfs -text
+# Optional: track model weights if ever committed
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
